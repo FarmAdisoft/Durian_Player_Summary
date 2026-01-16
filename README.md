@@ -1,4 +1,4 @@
-# Durian Player Summary
+# Duriano Player Summary
 
 A local web application to visualize and aggregate player statistics from the Durian game across different versions.
 
