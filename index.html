@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Durian Player Summary</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding: 20px; background-color: #f8f9fa; }
+        .table-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .player-id { font-family: monospace; font-size: 0.9em; color: #6c757d; }
+        .stat-alive { color: #198754; font-weight: bold; }
+        .stat-dead { color: #dc3545; font-weight: bold; }
+        .difficulty-col { font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">Durian Player Summary</h1>
+        <div id="alert-container"></div>
+        
+        <!-- Summary Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center h-100 border-primary">
+                    <div class="card-body">
+                        <h6 class="card-title text-primary">Unique Players</h6>
+                        <h2 class="card-text" id="summary-players">-</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center h-100 border-success">
+                    <div class="card-body">
+                        <h6 class="card-title text-success">Total Runs</h6>
+                        <h2 class="card-text" id="summary-runs">-</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center h-100 border-info">
+                    <div class="card-body">
+                        <h6 class="card-title text-info">Win Rate</h6>
+                        <h2 class="card-text" id="summary-winrate">-</h2>
+                        <small class="text-muted" id="summary-alive-dead"></small>
+                    </div>
+                </div>
+            </div>
+             <div class="col-md-3">
+                <div class="card text-center h-100 border-warning">
+                    <div class="card-body">
+                        <h6 class="card-title text-warning">Runs by Difficulty</h6>
+                        <div class="d-flex justify-content-between small text-secondary mt-2">
+                             <span title="Normal">N: <b id="summary-normal">-</b></span>
+                             <span title="Hard">H: <b id="summary-hard">-</b></span>
+                             <span title="Hell">Hell: <b id="summary-hell">-</b></span>
+                             <span title="Duriano">D: <b id="summary-duriano">-</b></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex align-items-center gap-3">
+                    <h5 class="m-0">Player Statistics</h5>
+                    <select id="version-select" class="form-select form-select-sm" style="width: auto;">
+                        <option value="all">All Versions (Combined)</option>
+                        <option value="summary_counts_0.6.22.json">v0.6.22</option>
+                        <option value="summary_counts_0.6.21.json">v0.6.21</option>
+                        <option value="summary_counts_0.6.20.json">v0.6.20</option>
+                    </select>
+                </div>
+                <span id="last-updated" class="text-muted small"></span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle" id="summary-table">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Player Name</th>
+                            <th class="text-center">Total Runs</th>
+                            <th class="text-center">Alive</th>
+                            <th class="text-center">Dead</th>
+                            <th class="text-center">Normal</th>
+                            <th class="text-center">Hard</th>
+                            <th class="text-center">Hell</th>
+                            <th class="text-center">Duriano</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        let availableFiles = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const versionSelect = document.getElementById('version-select');
+            
+            try {
+                // 1. Load metadata to get list of versions
+                const metaResponse = await fetch('metadata.json');
+                if (!metaResponse.ok) throw new Error('Failed to load metadata.json');
+                const metadata = await metaResponse.json();
+
+                // 2. Store files for the "All Versions" feature
+                availableFiles = metadata.map(m => m.file);
+
+                // 3. Clear and Populate Dropdown
+                versionSelect.innerHTML = ''; // Clear existing
+                
+                // Add "All Versions" option
+                const allOption = document.createElement('option');
+                allOption.value = 'all';
+                allOption.textContent = 'All Versions (Combined)';
+                versionSelect.appendChild(allOption);
+
+                // Add dynamic options
+                metadata.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.file;
+                    option.textContent = item.label;
+                    versionSelect.appendChild(option);
+                });
+
+                // 4. Trigger initial fetch (load the newest version by default, which is index 1 after "all")
+                // Or we can load "all" by default. Let's load the newest individual version for speed.
+                if (metadata.length > 0) {
+                    versionSelect.value = metadata[0].file;
+                    handleFetch(metadata[0].file);
+                } else {
+                    showAlert('No version data found in metadata.json', 'warning');
+                }
+
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showAlert('Failed to initialize: ' + error.message, 'danger');
+            }
+
+            // Fetch on change
+            versionSelect.addEventListener('change', (e) => {
+                handleFetch(e.target.value);
+            });
+        });
+
+        async function handleFetch(value) {
+            if (value === 'all') {
+                await fetchAndMergeAll();
+            } else {
+                await fetchData(value);
+            }
+        }
+
+        async function fetchAndMergeAll() {
+            try {
+                if (availableFiles.length === 0) {
+                    throw new Error("No files available to merge.");
+                }
+
+                const promises = availableFiles.map(file => fetch(file).then(res => {
+                    if (!res.ok) throw new Error(`Failed to load ${file}`);
+                    return res.json();
+                }));
+                
+                const results = await Promise.all(promises);
+                
+                // Merge Logic
+                const mergedPlayers = new Map();
+                let latestTimestamp = '';
+
+                results.forEach(result => {
+                    // Keep track of the most recent timestamp
+                    if (!latestTimestamp || (result.timestamp && result.timestamp > latestTimestamp)) {
+                        latestTimestamp = result.timestamp;
+                    }
+
+                    if (result.data && Array.isArray(result.data)) {
+                        result.data.forEach(player => {
+                            if (mergedPlayers.has(player.playerName)) {
+                                const existing = mergedPlayers.get(player.playerName);
+                                existing.count += (player.count || 0);
+                                existing.Alive += (player.Alive || 0);
+                                existing.Dead += (player.Dead || 0);
+                                existing.Normal += (player.Normal || 0);
+                                existing.Hard += (player.Hard || 0);
+                                existing.Hell += (player.Hell || 0);
+                                existing.Duriano += (player.Duriano || 0);
+                            } else {
+                                // Clone to avoid mutating original data references if we were caching
+                                mergedPlayers.set(player.playerName, { ...player });
+                            }
+                        });
+                    }
+                });
+
+                const mergedDataObj = {
+                    timestamp: `Combined Data (Latest: ${latestTimestamp})`,
+                    data: Array.from(mergedPlayers.values())
+                };
+
+                renderTable(mergedDataObj);
+
+            } catch (error) {
+                console.error('Error merging data:', error);
+                showAlert('Error merging all version data: ' + error.message, 'danger');
+            }
+        }
+
+        async function fetchData(filename) {
+            try {
+                const response = await fetch(filename);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const jsonData = await response.json();
+                renderTable(jsonData);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                showAlert(`Error loading data from ${filename}. Make sure you are running this on a local server. Error: ` + error.message, 'danger');
+            }
+        }
+
+        function renderTable(dataObj) {
+            const tbody = document.querySelector('#summary-table tbody');
+            const lastUpdatedSpan = document.getElementById('last-updated');
+            
+            if (dataObj.timestamp) {
+                lastUpdatedSpan.textContent = `Last Updated: ${dataObj.timestamp}`;
+            }
+
+            const players = dataObj.data || [];
+            
+            // Calculate Summaries
+            const totalPlayers = players.length;
+            const totalRuns = players.reduce((sum, p) => sum + (p.count || 0), 0);
+            const totalAlive = players.reduce((sum, p) => sum + (p.Alive || 0), 0);
+            const totalDead = players.reduce((sum, p) => sum + (p.Dead || 0), 0);
+            
+            const totalNormal = players.reduce((sum, p) => sum + (p.Normal || 0), 0);
+            const totalHard = players.reduce((sum, p) => sum + (p.Hard || 0), 0);
+            const totalHell = players.reduce((sum, p) => sum + (p.Hell || 0), 0);
+            const totalDuriano = players.reduce((sum, p) => sum + (p.Duriano || 0), 0);
+
+            // Update Summary DOM
+            document.getElementById('summary-players').textContent = totalPlayers;
+            document.getElementById('summary-runs').textContent = totalRuns;
+            
+            const winRate = totalRuns > 0 ? ((totalAlive / totalRuns) * 100).toFixed(1) + '%' : '0%';
+            document.getElementById('summary-winrate').textContent = winRate;
+            document.getElementById('summary-alive-dead').textContent = `${totalAlive} Alive / ${totalDead} Dead`;
+
+            document.getElementById('summary-normal').textContent = totalNormal;
+            document.getElementById('summary-hard').textContent = totalHard;
+            document.getElementById('summary-hell').textContent = totalHell;
+            document.getElementById('summary-duriano').textContent = totalDuriano;
+            
+            // Sort by count descending (optional, but usually helpful)
+            players.sort((a, b) => b.count - a.count);
+
+            tbody.innerHTML = players.map(player => `
+                <tr>
+                    <td><span class="player-id" title="${player.playerName}">${player.playerName}</span></td>
+                    <td class="text-center fw-bold">${player.count}</td>
+                    <td class="text-center stat-alive">${player.Alive}</td>
+                    <td class="text-center stat-dead">${player.Dead}</td>
+                    <td class="text-center difficulty-col text-secondary">${player.Normal}</td>
+                    <td class="text-center difficulty-col text-secondary">${player.Hard}</td>
+                    <td class="text-center difficulty-col text-warning">${player.Hell}</td>
+                    <td class="text-center difficulty-col text-danger fw-bold">${player.Duriano}</td>
+                </tr>
+            `).join('');
+        }
+
+        function showAlert(message, type) {
+            const container = document.getElementById('alert-container');
+            container.innerHTML = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
