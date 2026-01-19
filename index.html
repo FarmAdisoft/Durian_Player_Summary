@@ -164,7 +164,7 @@
         async function initializeVersions() {
             const versionSelect = document.getElementById('version-select');
             try {
-                const metaResponse = await fetch('metadata.json');
+                const metaResponse = await fetch(`metadata.json?t=${new Date().getTime()}`);
                 if (!metaResponse.ok) throw new Error('Failed to load metadata.json');
                 const metadata = await metaResponse.json();
 
