@@ -1,316 +1,490 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Duriano Player Summary</title>
-    <!-- Bootstrap CSS -->
+    <title>Duriano Tracker | Player Statistics</title>
+    <!-- Bootstrap 5.3 Dark Mode -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- FontAwesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&display=swap"
+        rel="stylesheet">
+
     <style>
-        body { padding: 20px; background-color: #f8f9fa; }
-        .table-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .player-id { font-family: monospace; font-size: 0.9em; color: #6c757d; }
-        .stat-alive { color: #198754; font-weight: bold; }
-        .stat-dead { color: #dc3545; font-weight: bold; }
-        .difficulty-col { font-size: 0.9em; }
-        
-        /* Sorting Styles */
-        th.sortable { cursor: pointer; user-select: none; }
-        th.sortable:hover { background-color: #e9ecef; }
-        th.sortable i { margin-left: 5px; font-size: 0.8em; color: #adb5bd; }
-        th.sortable.asc i.fa-sort-up { color: #495057; display: inline; }
-        th.sortable.desc i.fa-sort-down { color: #495057; display: inline; }
-        th.sortable .fa-sort { display: inline; }
-        th.sortable.asc .fa-sort, th.sortable.desc .fa-sort { display: none; }
-        th.sortable .fa-sort-up, th.sortable .fa-sort-down { display: none; }
+        :root {
+            --bs-body-bg: #0f1115;
+            --bs-body-color: #dee2e6;
+            --card-bg: #16191d;
+            --accent-color: #ffd700;
+            /* Gold */
+            --diff-normal: #6c757d;
+            --diff-hard: #aab2bd;
+            --diff-hell: #ffc107;
+            --diff-duriano: #dc3545;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bs-body-bg);
+        }
+
+        .navbar {
+            background-color: #16191d;
+            border-bottom: 1px solid #2d3238;
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--accent-color) !important;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid #2d3238;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #8b949e;
+        }
+
+        /* Table Styles */
+        .table-container {
+            background-color: var(--card-bg);
+            border: 1px solid #2d3238;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .table {
+            --bs-table-bg: transparent;
+            margin-bottom: 0;
+        }
+
+        .table th {
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #2d3238;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .table th:hover {
+            color: var(--accent-color);
+        }
+
+        .table td {
+            vertical-align: middle;
+            border-color: #2d3238;
+            font-size: 0.95rem;
+        }
+
+        .player-id {
+            font-family: 'JetBrains Mono', monospace;
+            color: #a5d6ff;
+            font-size: 0.9em;
+        }
+
+        .win-rate-bar {
+            height: 6px;
+            background-color: #2d3238;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .win-rate-fill {
+            height: 100%;
+            background-color: var(--accent-color);
+        }
+
+        /* Platform Icons */
+        .platform-icon {
+            color: #8b949e;
+        }
+
+        /* Difficulty Badges */
+        .diff-badge {
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            display: inline-block;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .diff-badge.normal {
+            color: var(--diff-normal);
+            border: 1px solid var(--diff-normal);
+        }
+
+        .diff-badge.hard {
+            color: var(--diff-hard);
+            border: 1px solid var(--diff-hard);
+        }
+
+        .diff-badge.hell {
+            color: var(--diff-hell);
+            border: 1px solid var(--diff-hell);
+        }
+
+        .diff-badge.duriano {
+            color: var(--diff-duriano);
+            border: 1px solid var(--diff-duriano);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f1115;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #2d3238;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #444c56;
+        }
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <!-- Header Section -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="m-0">Duriano Player Summary</h1>
-            <button id="refresh-btn" class="btn btn-outline-primary">
-                <i class="fas fa-sync-alt"></i> Refresh Data
-            </button>
-        </div>
 
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand" href="#"><i class="fas fa-crown me-2"></i>DURIANO TRACKER</a>
+            <div class="d-flex align-items-center gap-3">
+                <select id="version-select" class="form-select form-select-sm bg-dark text-light border-secondary"
+                    style="width: 200px;">
+                    <option value="loading">Loading versions...</option>
+                </select>
+                <button id="refresh-btn" class="btn btn-sm btn-outline-warning">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4 py-4">
+
+        <!-- Alerts -->
         <div id="alert-container"></div>
-        
-        <!-- Summary Section -->
-        <div class="row mb-4">
-            <!-- Stats Cards -->
-            <div class="col-lg-8">
-                <div class="row g-3 h-100">
-                    <div class="col-md-6">
-                        <div class="card text-center h-100 border-primary">
-                            <div class="card-body d-flex flex-column justify-content-center">
-                                <h6 class="card-title text-primary">Unique Players</h6>
-                                <h2 class="card-text" id="summary-players">-</h2>
-                            </div>
-                        </div>
+
+        <!-- Global Stats -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="card h-100 p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="stat-label">Unique Players</span>
+                        <i class="fas fa-users text-muted"></i>
                     </div>
-                    <div class="col-md-6">
-                        <div class="card text-center h-100 border-success">
-                            <div class="card-body d-flex flex-column justify-content-center">
-                                <h6 class="card-title text-success">Total Runs</h6>
-                                <h2 class="card-text" id="summary-runs">-</h2>
-                            </div>
-                        </div>
+                    <div class="stat-value" id="stat-players">-</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="stat-label">Total Runs</span>
+                        <i class="fas fa-gamepad text-muted"></i>
                     </div>
-                    <div class="col-md-6">
-                        <div class="card text-center h-100 border-info">
-                            <div class="card-body d-flex flex-column justify-content-center">
-                                <h6 class="card-title text-info">Win Rate</h6>
-                                <h2 class="card-text" id="summary-winrate">-</h2>
-                                <small class="text-muted" id="summary-alive-dead"></small>
-                            </div>
-                        </div>
+                    <div class="stat-value" id="stat-runs">-</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="stat-label">Global Win Rate</span>
+                        <i class="fas fa-trophy text-muted"></i>
                     </div>
-                     <div class="col-md-6">
-                        <div class="card text-center h-100 border-warning">
-                            <div class="card-body d-flex flex-column justify-content-center">
-                                <h6 class="card-title text-warning">Runs by Difficulty</h6>
-                                <div class="d-flex justify-content-around small text-secondary mt-2">
-                                     <span title="Normal">Normal: <b id="summary-normal">-</b></span>
-                                     <span title="Hard">Hard: <b id="summary-hard">-</b></span>
-                                     <span title="Hell">Hell: <b id="summary-hell">-</b></span>
-                                     <span title="Duriano">Duriano: <b id="summary-duriano">-</b></span>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="stat-value text-warning" id="stat-winrate">-</div>
+                    <small class="text-muted" id="stat-win-loss"></small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="stat-label">Most Played Diff</span>
+                        <i class="fas fa-chart-bar text-muted"></i>
+                    </div>
+                    <div class="stat-value" id="stat-fav-diff">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Difficulty Detailed Stats -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="card h-100 p-3" style="border-left: 4px solid var(--diff-normal);">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="stat-label text-light">Normal</span>
+                        <i class="fas fa-user text-muted"></i>
+                    </div>
+                    <div class="stat-value fs-4" id="stat-normal-runs">-</div>
+                    <small class="text-muted" id="stat-normal-wr">-</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 p-3" style="border-left: 4px solid var(--diff-hard);">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="stat-label text-light">Hard</span>
+                        <i class="fas fa-skull text-muted"></i>
+                    </div>
+                    <div class="stat-value fs-4" id="stat-hard-runs">-</div>
+                    <small class="text-muted" id="stat-hard-wr">-</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 p-3" style="border-left: 4px solid var(--diff-hell);">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="stat-label text-light">Hell</span>
+                        <i class="fas fa-fire text-muted"></i>
+                    </div>
+                    <div class="stat-value fs-4" id="stat-hell-runs">-</div>
+                    <small class="text-muted" id="stat-hell-wr">-</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 p-3" style="border-left: 4px solid var(--diff-duriano);">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="stat-label text-light">Duriano</span>
+                        <i class="fas fa-dragon text-muted"></i>
+                    </div>
+                    <div class="stat-value fs-4" id="stat-duriano-runs">-</div>
+                    <small class="text-muted" id="stat-duriano-wr">-</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 p-3">
+                    <h6 class="card-title text-muted mb-3">Runs by Difficulty</h6>
+                    <div style="height: 250px; position: relative;">
+                        <canvas id="runsChart"></canvas>
                     </div>
                 </div>
             </div>
-            
-            <!-- Charts -->
-            <div class="col-lg-4 mt-3 mt-lg-0">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h6 class="card-title text-center text-secondary mb-3">Runs Distribution</h6>
-                        <div style="height: 200px; position: relative;">
-                            <canvas id="runsChart"></canvas>
-                        </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 p-3">
+                    <h6 class="card-title text-muted mb-3">Runs by Platform</h6>
+                    <div style="height: 250px; position: relative;">
+                        <canvas id="platformChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12 col-lg-6">
+                <div class="card h-100 p-3">
+                    <h6 class="card-title text-muted mb-3">Survival Rates (Alive vs Dead)</h6>
+                    <div style="height: 250px; position: relative;">
+                        <canvas id="survivalChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Toolbar -->
-        <div class="table-container mb-3" style="border-bottom-left-radius: 0; border-bottom-right-radius: 0;">
-            <div class="row g-3 align-items-center">
-                <div class="col-md-4">
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-search"></i></span>
-                        <input type="text" id="search-input" class="form-control" placeholder="Search Player Name...">
-                    </div>
+        <!-- Table Section -->
+        <div class="table-container">
+            <div
+                class="p-3 border-bottom border-secondary d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div class="input-group" style="max-width: 400px;">
+                    <span class="input-group-text bg-dark border-secondary text-muted"><i
+                            class="fas fa-search"></i></span>
+                    <input type="text" id="search-input" class="form-control bg-dark border-secondary text-light"
+                        placeholder="Search Player ID...">
                 </div>
-                <div class="col-md-8 d-flex justify-content-md-end gap-3 align-items-center">
-                    <select id="version-select" class="form-select" style="width: auto;">
-                        <option value="loading">Loading versions...</option>
-                    </select>
-                    <span id="last-updated" class="text-muted small text-nowrap"></span>
+                <div class="text-muted small">
+                    <span id="last-updated"></span>
                 </div>
             </div>
-        </div>
 
-        <!-- Table -->
-        <div class="table-container pt-0" style="border-top-left-radius: 0; border-top-right-radius: 0;">
             <div class="table-responsive">
-                <table class="table table-hover align-middle" id="summary-table">
-                    <thead class="table-light">
+                <table class="table table-hover align-middle">
+                    <thead>
                         <tr>
-                            <th class="sortable" data-sort="playerName">Player Name <i class="fas fa-sort"></i><i class="fas fa-sort-up"></i><i class="fas fa-sort-down"></i></th>
-                            <th class="text-center sortable" data-sort="count">Total Runs <i class="fas fa-sort"></i><i class="fas fa-sort-up"></i><i class="fas fa-sort-down"></i></th>
-                            <th class="text-center sortable" data-sort="Alive">Alive <i class="fas fa-sort"></i><i class="fas fa-sort-up"></i><i class="fas fa-sort-down"></i></th>
-                            <th class="text-center sortable" data-sort="Dead">Dead <i class="fas fa-sort"></i><i class="fas fa-sort-up"></i><i class="fas fa-sort-down"></i></th>
-                            <th class="text-center sortable" data-sort="Normal.Total">Normal <i class="fas fa-sort"></i><i class="fas fa-sort-up"></i><i class="fas fa-sort-down"></i></th>
-                            <th class="text-center sortable" data-sort="Hard.Total">Hard <i class="fas fa-sort"></i><i class="fas fa-sort-up"></i><i class="fas fa-sort-down"></i></th>
-                            <th class="text-center sortable" data-sort="Hell.Total">Hell <i class="fas fa-sort"></i><i class="fas fa-sort-up"></i><i class="fas fa-sort-down"></i></th>
-                            <th class="text-center sortable" data-sort="Duriano.Total">Duriano <i class="fas fa-sort"></i><i class="fas fa-sort-up"></i><i class="fas fa-sort-down"></i></th>
+                            <th scope="col" class="sortable" data-sort="playerName">Player ID <i
+                                    class="fas fa-sort float-end mt-1"></i></th>
+                            <th scope="col" class="text-center sortable" data-sort="Platform">Plat <i
+                                    class="fas fa-sort float-end mt-1"></i></th>
+                            <th scope="col" class="text-center sortable" data-sort="count">Runs <i
+                                    class="fas fa-sort float-end mt-1"></i></th>
+                            <th scope="col" class="sortable" style="width: 150px;" data-sort="winRate">Win Rate <i
+                                    class="fas fa-sort float-end mt-1"></i></th>
+                            <th scope="col" class="text-center sortable" data-sort="Normal">Normal <i
+                                    class="fas fa-sort float-end mt-1"></i></th>
+                            <th scope="col" class="text-center sortable" data-sort="Hard">Hard <i
+                                    class="fas fa-sort float-end mt-1"></i></th>
+                            <th scope="col" class="text-center sortable" data-sort="Hell">Hell <i
+                                    class="fas fa-sort float-end mt-1"></i></th>
+                            <th scope="col" class="text-center sortable" data-sort="Duriano">Duriano <i
+                                    class="fas fa-sort float-end mt-1"></i></th>
                         </tr>
                     </thead>
                     <tbody id="table-body">
-                        <!-- Data will be inserted here -->
+                        <!-- Rows injected via JS -->
                     </tbody>
                 </table>
             </div>
-            <div id="no-results" class="text-center text-muted py-3 d-none">
-                No players found matching your search.
+            <div id="no-results" class="text-center py-5 d-none">
+                <i class="fas fa-ghost fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No players found.</p>
             </div>
         </div>
+
     </div>
 
-    <!-- Bootstrap JS -->
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
     <script>
-        // State
+        // --- Configuration & State ---
         let availableFiles = [];
-        let rawData = []; // Full dataset
-        let filteredData = []; // Data after search
-        let sortState = { key: 'count', dir: 'desc' }; // Default sort
-        let chartInstance = null;
+        let rawData = [];
+        let filteredData = [];
+        let sortState = { key: 'count', dir: 'desc' };
+        let charts = { runs: null, survival: null, platform: null };
 
+        const DIFF_COLORS = {
+            Normal: '#6c757d',
+            Hard: '#aab2bd',
+            Hell: '#ffc107',
+            Duriano: '#dc3545'
+        };
+
+        // --- Initialization ---
         document.addEventListener('DOMContentLoaded', async () => {
-            await initializeVersions();
-            setupEventListeners();
+            await initVersions();
+            setupEvents();
         });
 
-        async function initializeVersions() {
-            const versionSelect = document.getElementById('version-select');
+        async function initVersions() {
             try {
-                const metaResponse = await fetch(`metadata.json?t=${new Date().getTime()}`);
-                if (!metaResponse.ok) throw new Error('Failed to load metadata.json');
-                const metadata = await metaResponse.json();
+                const res = await fetch(`metadata.json?t=${Date.now()}`);
+                if (!res.ok) throw new Error('Metadata missing');
+                const meta = await res.json();
 
-                availableFiles = metadata.map(m => m.file);
-                versionSelect.innerHTML = ''; 
+                availableFiles = meta;
+                const select = document.getElementById('version-select');
+                select.innerHTML = '<option value="all">All Versions (Combined)</option>';
 
-                // Options
-                const allOption = document.createElement('option');
-                allOption.value = 'all';
-                allOption.textContent = 'All Versions (Combined)';
-                versionSelect.appendChild(allOption);
-
-                metadata.forEach(item => {
-                    const option = document.createElement('option');
-                    option.value = item.file;
-                    option.textContent = item.label;
-                    versionSelect.appendChild(option);
+                meta.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.file;
+                    opt.textContent = m.label;
+                    select.appendChild(opt);
                 });
 
-                // Load initial
-                if (metadata.length > 0) {
-                    versionSelect.value = metadata[0].file;
-                    handleFetch(metadata[0].file);
-                } else {
-                    showAlert('No version data found.', 'warning');
+                // Default to latest single version or all? Let's default to All for big picture, 
+                // or the latest file (index 0) if preferred. Let's do index 0 (latest version).
+                if (meta.length > 0) {
+                    select.value = meta[0].file;
+                    loadData(meta[0].file);
                 }
-
-            } catch (error) {
-                console.error('Init error:', error);
-                showAlert('Failed to initialize versions: ' + error.message, 'danger');
+            } catch (err) {
+                showAlert('Failed to init: ' + err.message, 'danger');
             }
         }
 
-        function setupEventListeners() {
-            // Version Change
-            document.getElementById('version-select').addEventListener('change', (e) => {
-                handleFetch(e.target.value);
-            });
-
-            // Refresh Button
+        function setupEvents() {
+            document.getElementById('version-select').addEventListener('change', (e) => loadData(e.target.value));
             document.getElementById('refresh-btn').addEventListener('click', () => {
-                const currentVal = document.getElementById('version-select').value;
-                handleFetch(currentVal);
+                loadData(document.getElementById('version-select').value);
             });
-
-            // Search Input
             document.getElementById('search-input').addEventListener('input', (e) => {
-                applyFilters(e.target.value);
+                applyFilter(e.target.value);
             });
 
-            // Sorting
             document.querySelectorAll('th.sortable').forEach(th => {
                 th.addEventListener('click', () => {
                     const key = th.dataset.sort;
-                    handleSort(key, th);
+                    handleSort(key);
                 });
             });
         }
 
-        async function handleFetch(value) {
-            // Show loading state if needed
+        // --- Data Loading ---
+        async function loadData(source) {
             const btn = document.getElementById('refresh-btn');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-            btn.disabled = true;
+            btn.classList.add('disabled');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
             try {
-                if (value === 'all') {
-                    await fetchAndMergeAll();
-                } else {
-                    await fetchData(value);
-                }
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        }
+                let data = [];
+                let timestamp = '';
 
-        // --- Data Fetching Logic (Same as before, simplified) ---
+                if (source === 'all') {
+                    // Fetch all and merge
+                    const promises = availableFiles.map(f => fetch(`${f.file}?t=${Date.now()}`).then(r => r.json()));
+                    const results = await Promise.all(promises);
+                    const merged = new Map();
 
-        async function fetchData(filename) {
-            try {
-                // Add timestamp to prevent browser caching on refresh
-                const response = await fetch(`${filename}?t=${new Date().getTime()}`);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const jsonData = await response.json();
-                processData(jsonData);
-            } catch (error) {
-                console.error('Fetch error:', error);
-                showAlert(`Error loading data: ${error.message}`, 'danger');
-            }
-        }
-
-        async function fetchAndMergeAll() {
-            try {
-                if (availableFiles.length === 0) throw new Error("No files available.");
-                
-                const promises = availableFiles.map(file => 
-                    fetch(`${file}?t=${new Date().getTime()}`).then(res => {
-                        if (!res.ok) throw new Error(`Failed to load ${file}`);
-                        return res.json();
-                    })
-                );
-                
-                const results = await Promise.all(promises);
-                
-                const mergedPlayers = new Map();
-                let latestTimestamp = '';
-
-                results.forEach(result => {
-                    if (!latestTimestamp || (result.timestamp && result.timestamp > latestTimestamp)) {
-                        latestTimestamp = result.timestamp;
-                    }
-                    if (result.data && Array.isArray(result.data)) {
-                        result.data.forEach(player => {
-                            if (mergedPlayers.has(player.playerName)) {
-                                mergePlayerStats(mergedPlayers.get(player.playerName), player);
+                    results.forEach(res => {
+                        if (res.timestamp > timestamp) timestamp = res.timestamp;
+                        (res.data || []).forEach(p => {
+                            if (merged.has(p.playerName)) {
+                                mergePlayer(merged.get(p.playerName), p);
                             } else {
-                                mergedPlayers.set(player.playerName, deepClonePlayer(player));
+                                merged.set(p.playerName, deepClone(p));
                             }
                         });
-                    }
+                    });
+                    data = Array.from(merged.values());
+                    timestamp = `Merged (Latest: ${timestamp})`;
+                } else {
+                    const res = await fetch(`${source}?t=${Date.now()}`);
+                    if (!res.ok) throw new Error(`Failed to load ${source}`);
+                    const json = await res.json();
+                    data = json.data || [];
+                    timestamp = json.timestamp;
+                }
+
+                // Pre-calculate win rates for sorting
+                data.forEach(p => {
+                    p.winRate = p.count > 0 ? (p.Alive / p.count) : 0;
                 });
 
-                processData({
-                    timestamp: `Combined Data (Latest: ${latestTimestamp})`,
-                    data: Array.from(mergedPlayers.values())
-                });
+                rawData = data;
+                document.getElementById('last-updated').textContent = timestamp;
 
-            } catch (error) {
-                console.error('Merge error:', error);
-                showAlert('Error merging data: ' + error.message, 'danger');
+                updateStats();
+                updateCharts();
+                applyFilter(document.getElementById('search-input').value);
+
+            } catch (err) {
+                console.error(err);
+                showAlert(`Error loading data: ${err.message}`, 'danger');
+            } finally {
+                btn.classList.remove('disabled');
+                btn.innerHTML = '<i class="fas fa-sync-alt"></i>';
             }
         }
 
-        // --- Helpers ---
-
-        function deepClonePlayer(player) {
-            const newP = { ...player };
-            if (player.byDifficulty) {
-                newP.byDifficulty = JSON.parse(JSON.stringify(player.byDifficulty));
-            }
-            return newP;
-        }
-
-        function mergePlayerStats(target, source) {
+        function mergePlayer(target, source) {
             target.count += (source.count || 0);
             target.Alive += (source.Alive || 0);
             target.Dead += (source.Dead || 0);
@@ -319,223 +493,338 @@
             target.Hell += (source.Hell || 0);
             target.Duriano += (source.Duriano || 0);
 
+            // Platform (Merge counts)
+            if (source.Platform) {
+                if (!target.Platform) target.Platform = {};
+                Object.keys(source.Platform).forEach(k => {
+                    target.Platform[k] = (target.Platform[k] || 0) + source.Platform[k];
+                });
+            }
+
+            // Merge nested byDifficulty
             if (source.byDifficulty) {
                 if (!target.byDifficulty) target.byDifficulty = {};
-                ['Normal', 'Hard', 'Hell', 'Duriano'].forEach(diff => {
-                    if (source.byDifficulty[diff]) {
-                        if (!target.byDifficulty[diff]) {
-                            target.byDifficulty[diff] = { ...source.byDifficulty[diff] };
+                ['Normal', 'Hard', 'Hell', 'Duriano'].forEach(d => {
+                    if (source.byDifficulty[d]) {
+                        if (!target.byDifficulty[d]) {
+                            target.byDifficulty[d] = { ...source.byDifficulty[d] };
                         } else {
-                            target.byDifficulty[diff].Alive += (source.byDifficulty[diff].Alive || 0);
-                            target.byDifficulty[diff].Dead += (source.byDifficulty[diff].Dead || 0);
-                            target.byDifficulty[diff].Total += (source.byDifficulty[diff].Total || 0);
+                            target.byDifficulty[d].Alive += (source.byDifficulty[d].Alive || 0);
+                            target.byDifficulty[d].Dead += (source.byDifficulty[d].Dead || 0);
+                            target.byDifficulty[d].Total += (source.byDifficulty[d].Total || 0);
                         }
                     }
                 });
             }
         }
 
-        // --- Data Processing & Rendering ---
-
-        function processData(dataObj) {
-            rawData = dataObj.data || [];
-            
-            // Update Timestamp
-            const tsElement = document.getElementById('last-updated');
-            if (dataObj.timestamp) tsElement.textContent = `Updated: ${dataObj.timestamp}`;
-
-            // Calculate & Render Totals
-            updateSummaryCards(rawData);
-            updateChart(rawData);
-
-            // Apply existing Filters & Sort
-            applyFilters(document.getElementById('search-input').value);
+        function deepClone(obj) {
+            // Basic deep clone, also handling byDifficulty structure
+            const newObj = JSON.parse(JSON.stringify(obj));
+            // Ensure byDifficulty is clean if it exists
+            if (newObj.byDifficulty) {
+                // It's already cloned by JSON.parse/stringify, just ensuring it's there
+            } else {
+                newObj.byDifficulty = {};
+            }
+            return newObj;
         }
 
-        function updateSummaryCards(players) {
-            const totalPlayers = players.length;
-            const totalRuns = players.reduce((sum, p) => sum + (p.count || 0), 0);
-            const totalAlive = players.reduce((sum, p) => sum + (p.Alive || 0), 0);
-            const totalDead = players.reduce((sum, p) => sum + (p.Dead || 0), 0);
-            
-            const totalNormal = players.reduce((sum, p) => sum + (p.Normal || 0), 0);
-            const totalHard = players.reduce((sum, p) => sum + (p.Hard || 0), 0);
-            const totalHell = players.reduce((sum, p) => sum + (p.Hell || 0), 0);
-            const totalDuriano = players.reduce((sum, p) => sum + (p.Duriano || 0), 0);
+        // --- Rendering ---
+        function updateStats() {
+            const totalPlayers = rawData.length;
+            const totalRuns = rawData.reduce((s, p) => s + p.count, 0);
+            const totalAlive = rawData.reduce((s, p) => s + p.Alive, 0);
+            const winRate = totalRuns ? ((totalAlive / totalRuns) * 100).toFixed(1) : 0;
 
-            document.getElementById('summary-players').textContent = totalPlayers;
-            document.getElementById('summary-runs').textContent = totalRuns;
-            
-            const winRate = totalRuns > 0 ? ((totalAlive / totalRuns) * 100).toFixed(1) + '%' : '0%';
-            document.getElementById('summary-winrate').textContent = winRate;
-            document.getElementById('summary-alive-dead').textContent = `${totalAlive} Alive / ${totalDead} Dead`;
+            document.getElementById('stat-players').textContent = totalPlayers;
+            document.getElementById('stat-runs').textContent = totalRuns;
+            document.getElementById('stat-winrate').textContent = winRate + '%';
+            document.getElementById('stat-win-loss').textContent = `${totalAlive} W - ${totalRuns - totalAlive} L`;
 
-            document.getElementById('summary-normal').textContent = totalNormal;
-            document.getElementById('summary-hard').textContent = totalHard;
-            document.getElementById('summary-hell').textContent = totalHell;
-            document.getElementById('summary-duriano').textContent = totalDuriano;
-        }
+            // Difficulty Breakdown & Favorite
+            const diffs = { Normal: 0, Hard: 0, Hell: 0, Duriano: 0 };
+            const modeStats = {
+                Normal: { runs: 0, wins: 0 },
+                Hard: { runs: 0, wins: 0 },
+                Hell: { runs: 0, wins: 0 },
+                Duriano: { runs: 0, wins: 0 }
+            };
 
-        function updateChart(players) {
-            const totalNormal = players.reduce((sum, p) => sum + (p.Normal || 0), 0);
-            const totalHard = players.reduce((sum, p) => sum + (p.Hard || 0), 0);
-            const totalHell = players.reduce((sum, p) => sum + (p.Hell || 0), 0);
-            const totalDuriano = players.reduce((sum, p) => sum + (p.Duriano || 0), 0);
+            rawData.forEach(p => {
+                // Total Runs per diff
+                diffs.Normal += p.Normal || 0;
+                diffs.Hard += p.Hard || 0;
+                diffs.Hell += p.Hell || 0;
+                diffs.Duriano += p.Duriano || 0;
 
-            const ctx = document.getElementById('runsChart').getContext('2d');
-            
-            if (chartInstance) {
-                chartInstance.destroy();
+                // Win Rate Stats (requires byDifficulty)
+                if (p.byDifficulty) {
+                    ['Normal', 'Hard', 'Hell', 'Duriano'].forEach(d => {
+                        if (p.byDifficulty[d]) {
+                            modeStats[d].runs += p.byDifficulty[d].Total || 0;
+                            modeStats[d].wins += p.byDifficulty[d].Alive || 0;
+                        } else {
+                            // Fallback if detail missing but count exists in root (assume 0 wins or just track runs)
+                            // Ideally root count should match byDifficulty total, but safely add runs from root if byDiff missing?
+                            // Actually, let's stick to root counts for total runs consistency
+                        }
+                    });
+                }
+            });
+
+            // Update Mode Cards
+            ['Normal', 'Hard', 'Hell', 'Duriano'].forEach(mode => {
+                // Use root counts (diffs) for total runs to be safe
+                const runs = diffs[mode];
+                const wins = modeStats[mode].wins; // Wins must come from detailed stats
+                // If detailed stats missing, wins might be undercounted. 
+
+                const wr = runs > 0 ? ((wins / runs) * 100).toFixed(1) + '%' : '0%';
+
+                document.getElementById(`stat-${mode.toLowerCase()}-runs`).textContent = runs > 0 ? `${runs} Runs` : '-';
+                document.getElementById(`stat-${mode.toLowerCase()}-wr`).textContent = runs > 0 ? `${wr} WR` : '-';
+            });
+
+
+            // Handle case where no runs exist to avoid reduce error
+            let fav = 'None';
+            if (Object.values(diffs).some(v => v > 0)) {
+                fav = Object.keys(diffs).reduce((a, b) => diffs[a] > diffs[b] ? a : b);
             }
 
-            chartInstance = new Chart(ctx, {
+            const favEl = document.getElementById('stat-fav-diff');
+            favEl.textContent = fav;
+            favEl.style.color = DIFF_COLORS[fav] || '#fff';
+        }
+
+        function updateCharts() {
+            const diffs = { Normal: 0, Hard: 0, Hell: 0, Duriano: 0 };
+            const survival = {
+                Normal: { alive: 0, dead: 0 },
+                Hard: { alive: 0, dead: 0 },
+                Hell: { alive: 0, dead: 0 },
+                Duriano: { alive: 0, dead: 0 }
+            };
+            const platformStats = { Windows: 0, macOS: 0, Linux: 0, Android: 0, iOS: 0, Unknown: 0 };
+
+            rawData.forEach(p => {
+                // Difficulty Stats
+                diffs.Normal += p.Normal || 0;
+                diffs.Hard += p.Hard || 0;
+                diffs.Hell += p.Hell || 0;
+                diffs.Duriano += p.Duriano || 0;
+
+                // Survival Stats
+                if (p.byDifficulty) {
+                    ['Normal', 'Hard', 'Hell', 'Duriano'].forEach(d => {
+                        if (p.byDifficulty[d]) {
+                            survival[d].alive += p.byDifficulty[d].Alive || 0;
+                            survival[d].dead += p.byDifficulty[d].Dead || 0;
+                        }
+                    });
+                }
+
+                // Platform Stats
+                if (p.Platform) {
+                    let hasPlatform = false;
+                    if (p.Platform.WindowsPlayer) { platformStats.Windows += p.Platform.WindowsPlayer; hasPlatform = true; }
+                    if (p.Platform.OSXPlayer) { platformStats.macOS += p.Platform.OSXPlayer; hasPlatform = true; }
+                    if (p.Platform.LinuxPlayer) { platformStats.Linux += p.Platform.LinuxPlayer; hasPlatform = true; }
+                    if (p.Platform.Android) { platformStats.Android += p.Platform.Android; hasPlatform = true; }
+                    if (p.Platform.IPhonePlayer) { platformStats.iOS += p.Platform.IPhonePlayer; hasPlatform = true; }
+                    
+                    if (!hasPlatform) platformStats.Unknown += (p.count || 0);
+                } else {
+                    platformStats.Unknown += (p.count || 0);
+                }
+            });
+
+            // Destroy old
+            if (charts.runs) charts.runs.destroy();
+            if (charts.survival) charts.survival.destroy();
+            if (charts.platform) charts.platform.destroy();
+
+            // Chart Defaults
+            Chart.defaults.color = '#8b949e';
+            Chart.defaults.borderColor = '#2d3238';
+
+            // Runs Chart
+            const ctxRuns = document.getElementById('runsChart').getContext('2d');
+            charts.runs = new Chart(ctxRuns, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Normal', 'Hard', 'Hell', 'Duriano'],
+                    labels: Object.keys(diffs),
                     datasets: [{
-                        data: [totalNormal, totalHard, totalHell, totalDuriano],
-                        backgroundColor: [
-                            '#6c757d', // Secondary (Normal)
-                            '#495057', // Dark (Hard)
-                            '#ffc107', // Warning (Hell)
-                            '#dc3545'  // Danger (Duriano)
-                        ],
-                        borderWidth: 1
+                        data: Object.values(diffs),
+                        backgroundColor: Object.values(DIFF_COLORS),
+                        borderWidth: 0
                     }]
                 },
                 options: {
-                    responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                            labels: { boxWidth: 12 }
+                    plugins: { legend: { position: 'right' } }
+                }
+            });
+
+            // Platform Chart
+            const ctxPlat = document.getElementById('platformChart').getContext('2d');
+            // Filter out zero values for cleaner chart
+            const platLabels = Object.keys(platformStats).filter(k => platformStats[k] > 0);
+            const platData = platLabels.map(k => platformStats[k]);
+            const platColors = {
+                Windows: '#0d6efd',
+                macOS: '#e2e6ea',
+                Linux: '#fd7e14',
+                Android: '#198754',
+                iOS: '#6610f2',
+                Unknown: '#343a40'
+            };
+
+            charts.platform = new Chart(ctxPlat, {
+                type: 'doughnut',
+                data: {
+                    labels: platLabels,
+                    datasets: [{
+                        data: platData,
+                        backgroundColor: platLabels.map(l => platColors[l]),
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right' } }
+                }
+            });
+
+            // Survival Chart
+            const ctxSurv = document.getElementById('survivalChart').getContext('2d');
+            charts.survival = new Chart(ctxSurv, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(survival),
+                    datasets: [
+                        {
+                            label: 'Alive',
+                            data: Object.values(survival).map(s => s.alive),
+                            backgroundColor: '#2ea043',
+                            stack: 'Stack 0'
+                        },
+                        {
+                            label: 'Dead',
+                            data: Object.values(survival).map(s => s.dead),
+                            backgroundColor: '#da3633',
+                            stack: 'Stack 0'
                         }
+                    ]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { grid: { color: '#2d3238' } }
                     }
                 }
             });
         }
 
-        function applyFilters(query) {
-            if (!query) {
-                filteredData = [...rawData];
-            } else {
-                const lowerQuery = query.toLowerCase();
-                filteredData = rawData.filter(p => p.playerName.toLowerCase().includes(lowerQuery));
-            }
-            
-            // Show/Hide no results
-            const noRes = document.getElementById('no-results');
-            if (filteredData.length === 0) noRes.classList.remove('d-none');
-            else noRes.classList.add('d-none');
-
-            // Apply Sort
-            doSort();
-        }
-
-        function handleSort(key, headerElement) {
-            // Toggle direction
-            if (sortState.key === key) {
-                sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
-            } else {
-                sortState.key = key;
-                sortState.dir = 'desc'; // Default to desc for new columns
+        function applyFilter(query) {
+            if (!query) filteredData = [...rawData];
+            else {
+                const lower = query.toLowerCase();
+                filteredData = rawData.filter(p => p.playerName.toLowerCase().includes(lower));
             }
 
-            // Update UI Icons
-            document.querySelectorAll('th.sortable').forEach(th => {
-                th.classList.remove('asc', 'desc');
-            });
-            headerElement.classList.add(sortState.dir);
+            document.getElementById('no-results').classList.toggle('d-none', filteredData.length > 0);
 
-            doSort();
-        }
-
-        function doSort() {
+            // Re-apply sort
             const { key, dir } = sortState;
-
             filteredData.sort((a, b) => {
-                let valA = getValue(a, key);
-                let valB = getValue(b, key);
-
-                if (valA < valB) return dir === 'asc' ? -1 : 1;
-                if (valA > valB) return dir === 'asc' ? 1 : -1;
-                return 0;
+                let valA = getSortValue(a, key);
+                let valB = getSortValue(b, key);
+                return (valA < valB ? -1 : 1) * (dir === 'asc' ? 1 : -1);
             });
 
-            renderTableRows(filteredData);
+            renderTable();
         }
 
-        function getValue(obj, path) {
-            // Helper to handle nested keys like "Normal.Total"
-            if (path.includes('.')) {
-                // Special case for our difficulty objects which might be missing
-                const [diff, prop] = path.split('.');
-                // If it's looking for Difficulty Total (e.g., Normal.Total)
-                // We actually want to sort by the player's root Normal/Hard/Hell prop if possible,
-                // OR dig into byDifficulty.
-                // However, the JSON structure has 'Normal' as a number on the root player object too.
-                // Let's rely on the root properties for sorting as they are simpler numbers:
-                // Normal, Hard, Hell, Duriano.
-                if (['Normal', 'Hard', 'Hell', 'Duriano'].includes(diff) && prop === 'Total') {
-                    return obj[diff] || 0;
-                }
-                return 0; // Fallback for complex nesting if we added more
+        function handleSort(key) {
+            if (sortState.key === key) sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
+            else { sortState.key = key; sortState.dir = 'desc'; }
+            applyFilter(document.getElementById('search-input').value);
+        }
+
+        function getSortValue(obj, key) {
+            if (key === 'Platform') {
+                if (!obj.Platform) return '';
+                return Object.keys(obj.Platform)[0] || '';
             }
-            return obj[path] || 0;
+            return obj[key] || 0;
         }
 
-        function renderTableRows(players) {
+        function renderTable() {
             const tbody = document.getElementById('table-body');
-            
-            tbody.innerHTML = players.map(player => {
-                const getStats = (diff) => {
-                    if (player.byDifficulty && player.byDifficulty[diff]) {
-                        return player.byDifficulty[diff];
+            tbody.innerHTML = filteredData.map(p => {
+                const wr = (p.winRate * 100).toFixed(0);
+                const wrColor = wr > 50 ? '#2ea043' : (wr > 20 ? '#d29922' : '#da3633');
+
+                // Platform Icons
+                let platIcons = [];
+                if (p.Platform) {
+                    if (p.Platform.WindowsPlayer) platIcons.push('<i class="fab fa-windows text-primary" title="Windows"></i>');
+                    if (p.Platform.OSXPlayer) platIcons.push('<i class="fab fa-apple text-secondary" title="macOS"></i>');
+                    if (p.Platform.LinuxPlayer) platIcons.push('<i class="fab fa-linux text-warning" title="Linux"></i>');
+                    if (p.Platform.Android) platIcons.push('<i class="fab fa-android text-success" title="Android"></i>');
+                    if (p.Platform.IPhonePlayer) platIcons.push('<i class="fas fa-mobile-screen text-info" title="iOS"></i>');
+                }
+                
+                const platDisplay = platIcons.length > 0 
+                    ? `<div class="d-flex justify-content-center gap-2">${platIcons.join('')}</div>`
+                    : '<i class="fas fa-question text-muted" title="Unknown"></i>';
+
+                // Difficulty Badge Helper
+                const getDiffBadge = (diffName, total) => {
+                    if (!total) return '<span class="text-muted">-</span>';
+
+                    let title = `${diffName}: ${total}`;
+                    if (p.byDifficulty && p.byDifficulty[diffName]) {
+                        const { Alive, Dead } = p.byDifficulty[diffName];
+                        title = `${diffName}\nAlive (Win): ${Alive}\nDead (Loss): ${Dead}`;
                     }
-                    // Fallback if root exists but detail doesn't
-                    return { Alive: 0, Dead: 0, Total: 0 };
-                };
 
-                const norm = getStats('Normal');
-                const hard = getStats('Hard');
-                const hell = getStats('Hell');
-                const dur = getStats('Duriano');
-
-                const formatCell = (stats) => {
-                    if (!stats || stats.Total === 0) return '<span class="text-muted">-</span>';
-                    return `
-                        <div class="d-flex justify-content-center gap-2 small">
-                            <span class="text-success fw-bold" title="Alive">${stats.Alive}</span>
-                            <span class="text-muted">/</span>
-                            <span class="text-danger fw-bold" title="Dead">${stats.Dead}</span>
-                        </div>
-                    `;
+                    return `<span class="diff-badge ${diffName.toLowerCase()}" title="${title}" style="cursor: help;">${total}</span>`;
                 };
 
                 return `
                 <tr>
-                    <td><span class="player-id" title="${player.playerName}">${player.playerName}</span></td>
-                    <td class="text-center fw-bold">${player.count}</td>
-                    <td class="text-center stat-alive">${player.Alive}</td>
-                    <td class="text-center stat-dead">${player.Dead}</td>
-                    <td class="text-center difficulty-col">${formatCell(norm)}</td>
-                    <td class="text-center difficulty-col">${formatCell(hard)}</td>
-                    <td class="text-center difficulty-col">${formatCell(hell)}</td>
-                    <td class="text-center difficulty-col">${formatCell(dur)}</td>
+                    <td>
+                        <div class="player-id" title="${p.playerName}">${p.playerName}</div>
+                    </td>
+                    <td class="text-center">${platDisplay}</td>
+                    <td class="text-center fw-bold text-light">${p.count}</td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="flex-grow-1 win-rate-bar">
+                                <div class="win-rate-fill" style="width: ${wr}%; background-color: ${wrColor}"></div>
+                            </div>
+                            <small class="text-muted" style="width: 35px; text-align: right;">${wr}%</small>
+                        </div>
+                    </td>
+                    <td class="text-center">${getDiffBadge('Normal', p.Normal)}</td>
+                    <td class="text-center">${getDiffBadge('Hard', p.Hard)}</td>
+                    <td class="text-center">${getDiffBadge('Hell', p.Hell)}</td>
+                    <td class="text-center">${getDiffBadge('Duriano', p.Duriano)}</td>
                 </tr>
             `}).join('');
         }
 
-        function showAlert(message, type) {
-            const container = document.getElementById('alert-container');
-            container.innerHTML = `
-                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-                    ${message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            `;
+        function showAlert(msg, type) {
+            const div = document.createElement('div');
+            div.className = `alert alert-${type} alert-dismissible fade show`;
+            div.innerHTML = `${msg}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+            document.getElementById('alert-container').appendChild(div);
         }
     </script>
 </body>
+
 </html>

@@ -4,6 +4,7 @@ import ssl
 
 # Configuration: Map filenames to their URLs
 SOURCES = {
+    "summary_counts_0.6.24.json": "https://us-central1-duriano.cloudfunctions.net/getSummaryCountsByNameFunction?version=0.6.24",
     "summary_counts_0.6.23.json": "https://us-central1-duriano.cloudfunctions.net/getSummaryCountsByNameFunction?version=0.6.23",
     "summary_counts_0.6.22.json": "https://us-central1-duriano.cloudfunctions.net/getSummaryCountsByNameFunction?version=0.6.22",
     "summary_counts_0.6.21.json": "https://us-central1-duriano.cloudfunctions.net/getSummaryCountsByNameFunction?version=0.6.21",
