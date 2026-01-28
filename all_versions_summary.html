@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Versions UAT Summary - Wednesday, January 28, 2026</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 900px; margin: 20px auto; padding: 20px; background-color: #f4f7f6; }
+        .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #2980b9; font-size: 1.2em; margin-top: 0; }
+        .date-badge { background: #3498db; color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.9em; float: right; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 15px; }
+        .metric { text-align: center; padding: 15px; background: #ebf5fb; border-radius: 6px; }
+        .metric-value { font-size: 1.5em; font-weight: bold; color: #2c3e50; display: block; }
+        .metric-label { font-size: 0.85em; color: #7f8c8d; text-transform: uppercase; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { text-align: left; padding: 10px; border-bottom: 1px solid #eee; }
+        th { color: #7f8c8d; font-size: 0.9em; background-color: #f9f9f9; }
+        .bar-container { background-color: #ecf0f1; border-radius: 4px; height: 10px; width: 100px; display: inline-block; vertical-align: middle; margin-right: 5px; }
+        .bar-fill { background-color: #2ecc71; height: 100%; border-radius: 4px; }
+        .footer { text-align: center; font-size: 0.8em; color: #95a5a6; margin-top: 30px; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <span class="date-badge">Wednesday, January 28, 2026</span>
+        <h1>Global UAT Summary Report</h1>
+        <p>Aggregated data from <strong>6 versions</strong> (0.6.20 to 0.6.25)</p>
+
+        <div class="grid">
+            <div class="metric">
+                <span class="metric-value">36</span>
+                <span class="metric-label">Total Unique Players</span>
+            </div>
+            <div class="metric">
+                <span class="metric-value">172</span>
+                <span class="metric-label">Total Runs</span>
+            </div>
+            <div class="metric">
+                <span class="metric-value">41</span>
+                <span class="metric-label">Total Survivors</span>
+            </div>
+            <div class="metric" style="background: #d4efdf;">
+                <span class="metric-value" style="color: #27ae60;">23.8%</span>
+                <span class="metric-label">Global Win Rate</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Difficulty Breakdown</h2>
+        <table>
+            <tr>
+                <th>Difficulty</th>
+                <th>Total Runs</th>
+                <th>Survivors</th>
+                <th>Win Rate</th>
+            </tr>
+            <tr>
+                <td><strong>Normal</strong></td>
+                <td>60</td>
+                <td>18</td>
+                <td>
+                    <div class="bar-container"><div class="bar-fill" style="width: 30.0%;"></div></div>
+                    30.0%
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Hard</strong></td>
+                <td>57</td>
+                <td>10</td>
+                <td>
+                    <div class="bar-container"><div class="bar-fill" style="width: 17.543859649122805%;"></div></div>
+                    17.5%
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Hell</strong></td>
+                <td>27</td>
+                <td>7</td>
+                <td>
+                    <div class="bar-container"><div class="bar-fill" style="width: 25.925925925925924%;"></div></div>
+                    25.9%
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Duriano</strong></td>
+                <td>28</td>
+                <td>6</td>
+                <td>
+                    <div class="bar-container"><div class="bar-fill" style="width: 21.428571428571427%;"></div></div>
+                    21.4%
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2>Platform Distribution</h2>
+        <div class="grid">
+            <div class="metric" style="background: #fff; border: 1px solid #eee;">
+                <span class="metric-value" style="font-size: 1.2em;">109</span>
+                <span class="metric-label">Android</span>
+            </div>
+            <div class="metric" style="background: #fff; border: 1px solid #eee;">
+                <span class="metric-value" style="font-size: 1.2em;">37</span>
+                <span class="metric-label">WindowsPlayer</span>
+            </div>
+            <div class="metric" style="background: #fff; border: 1px solid #eee;">
+                <span class="metric-value" style="font-size: 1.2em;">7</span>
+                <span class="metric-label">OSXPlayer</span>
+            </div>
+            <div class="metric" style="background: #fff; border: 1px solid #eee;">
+                <span class="metric-value" style="font-size: 1.2em;">19</span>
+                <span class="metric-label">IPhonePlayer</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>History by Version</h2>
+        <table>
+            <tr>
+                <th>Version</th>
+                <th>Players</th>
+                <th>Runs</th>
+                <th>Win Rate</th>
+            </tr>
+            <tr>
+                <td>0.6.25</td>
+                <td>1</td>
+                <td>1</td>
+                <td>0.0%</td>
+            </tr>
+            <tr>
+                <td>0.6.24</td>
+                <td>2</td>
+                <td>13</td>
+                <td>23.1%</td>
+            </tr>
+            <tr>
+                <td>0.6.23</td>
+                <td>9</td>
+                <td>24</td>
+                <td>25.0%</td>
+            </tr>
+            <tr>
+                <td>0.6.22</td>
+                <td>8</td>
+                <td>17</td>
+                <td>29.4%</td>
+            </tr>
+            <tr>
+                <td>0.6.21</td>
+                <td>16</td>
+                <td>53</td>
+                <td>24.5%</td>
+            </tr>
+            <tr>
+                <td>0.6.20</td>
+                <td>17</td>
+                <td>64</td>
+                <td>21.9%</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="footer">
+        Generated by Durian Player Summary System
+    </div>
+
+</body>
+</html>
